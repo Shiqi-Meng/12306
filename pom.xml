@@ -20,6 +20,10 @@
         <lombok.version>1.18.30</lombok.version>
     </properties>
 
+    <modules>
+        <module>dependencies</module>
+    </modules>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,6 +37,18 @@
             <version>${lombok.version}</version>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.skyemoon.index12306</groupId>
+                <artifactId>index12306-dependencies</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
