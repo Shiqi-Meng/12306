@@ -7,7 +7,7 @@ public final class UserReuseUtil {
     /**
      * 计算分片位置
      */
-    public static int hashShardingIsx(String username) {
+    public static int hashShardingIdx(String username) {
         return Math.abs(username.hashCode() % USER_REGISTER_REUSE_SHARDING_COUNT);
     }
 }
