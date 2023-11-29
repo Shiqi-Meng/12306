@@ -15,5 +15,6 @@
         <module>base</module>
         <module>bizs</module>
         <module>common</module>
+        <module>convention</module>
     </modules>
 </project>
