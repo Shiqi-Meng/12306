@@ -1,5 +1,7 @@
 package org.skyemoon.index12306.biz.userservice.config;
 
+import org.skyemoon.index12306.framework.starter.convention.result.Result;
+
 public final class Results {
 
     /**
