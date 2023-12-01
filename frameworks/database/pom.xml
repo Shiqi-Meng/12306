@@ -16,17 +16,17 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.skyemoon.index12306</groupId>-->
-<!--            <artifactId>index12306-common-spring-boot-starter</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.skyemoon.index12306</groupId>
+            <artifactId>index12306-common-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.skyemoon.index12306</groupId>-->
-<!--            <artifactId>index12306-convention-spring-boot-starter</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.skyemoon.index12306</groupId>
+            <artifactId>index12306-convention-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 <!--        <dependency>-->
 <!--            <groupId>org.skyemoon.index12306</groupId>-->

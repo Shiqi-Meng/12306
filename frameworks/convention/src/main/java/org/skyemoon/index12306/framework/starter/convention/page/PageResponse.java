@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 @Builder
 public class PageResponse<T> implements Serializable {
 
+    /**
+     * 序列版本号uid
+     */
     private static final long serialVersionUID = 1L;
 
     /**
