@@ -19,5 +19,6 @@
         <module>convention</module>
         <module>distributedid</module>
         <module>designpattern</module>
+        <module>log</module>
     </modules>
 </project>
