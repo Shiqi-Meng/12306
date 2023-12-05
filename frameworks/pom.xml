@@ -20,5 +20,7 @@
         <module>distributedid</module>
         <module>designpattern</module>
         <module>log</module>
+        <module>web</module>
+        <module>cache</module>
     </modules>
 </project>
