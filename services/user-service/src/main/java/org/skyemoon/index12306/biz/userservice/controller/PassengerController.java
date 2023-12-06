@@ -1,10 +1,10 @@
 package org.skyemoon.index12306.biz.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.skyemoon.index12306.biz.userservice.config.Results;
 import org.skyemoon.index12306.biz.userservice.dto.resp.PassengerRespDTO;
 import org.skyemoon.index12306.biz.userservice.service.PassengerService;
 import org.skyemoon.index12306.framework.starter.convention.result.Result;
+import org.skyemoon.index12306.framework.starter.web.Results;
 import org.skyemoon.index12306.frameworks.starter.user.core.UserContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

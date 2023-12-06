@@ -83,23 +83,23 @@
         </dependency>
 
 
-<!--        <dependency>-->
-<!--            <groupId>org.skyemoon.index12306</groupId>-->
-<!--            <artifactId>index12306-web-spring-boot-starter</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.skyemoon.index12306</groupId>
+            <artifactId>index12306-web-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.skyemoon.index12306</groupId>-->
-<!--            <artifactId>index12306-cache-spring-boot-starter</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.skyemoon.index12306</groupId>
+            <artifactId>index12306-cache-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.skyemoon.index12306</groupId>-->
-<!--            <artifactId>index12306-designpattern-spring-boot-starter</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.skyemoon.index12306</groupId>
+            <artifactId>index12306-designpattern-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.skyemoon.index12306</groupId>
