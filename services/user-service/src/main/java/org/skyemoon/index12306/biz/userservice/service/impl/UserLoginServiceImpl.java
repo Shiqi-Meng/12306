@@ -86,4 +86,9 @@ public class UserLoginServiceImpl implements UserLoginService {
         }
         throw new ServiceException("账号不存在或密码错误");
     }
+
+    @Override
+    public UserLoginRespDTO checkLogin(String accessToken) {
+        return distributedCache.get(accessToken, UserLoginRespDTO.class);
+    }
 }

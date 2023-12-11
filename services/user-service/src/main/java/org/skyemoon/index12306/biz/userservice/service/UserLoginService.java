@@ -11,4 +11,7 @@ public interface UserLoginService {
      * @return 用户登录返回结果
      */
     UserLoginRespDTO login(UserLoginReqDTO requestParam);
+
+    UserLoginRespDTO checkLogin(String accessToken);
 }
+
