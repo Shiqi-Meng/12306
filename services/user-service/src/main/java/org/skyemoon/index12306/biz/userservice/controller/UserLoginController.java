@@ -37,5 +37,9 @@ public class UserLoginController {
     /**
      * 用户退出登录
      */
-    
+    @GetMapping("/api/user-service/logout")
+    public Result<Void> logout(@RequestParam(required = false) String accessToken) {
+        userLoginService.logout(accessToken);
+        return Results.success();
+    }
 }

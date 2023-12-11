@@ -1,5 +1,6 @@
 package org.skyemoon.index12306.biz.userservice.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -90,5 +91,12 @@ public class UserLoginServiceImpl implements UserLoginService {
     @Override
     public UserLoginRespDTO checkLogin(String accessToken) {
         return distributedCache.get(accessToken, UserLoginRespDTO.class);
+    }
+
+    @Override
+    public void logout(String accessToken) {
+        if (StrUtil.isNotBlank(accessToken)) {
+            distributedCache.delete(accessToken);
+        }
     }
 }
