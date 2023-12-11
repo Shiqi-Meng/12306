@@ -12,9 +12,11 @@ import org.skyemoon.index12306.biz.userservice.dao.entity.UserDO;
 import org.skyemoon.index12306.biz.userservice.dao.entity.UserMailDO;
 import org.skyemoon.index12306.biz.userservice.dao.entity.UserPhoneDO;
 import org.skyemoon.index12306.biz.userservice.dao.mapper.*;
+import org.skyemoon.index12306.biz.userservice.dto.req.UserDeletionReqDTO;
 import org.skyemoon.index12306.biz.userservice.dto.req.UserLoginReqDTO;
 import org.skyemoon.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import org.skyemoon.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import org.skyemoon.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 import org.skyemoon.index12306.biz.userservice.service.UserLoginService;
 import org.skyemoon.index12306.biz.userservice.service.UserService;
 import org.skyemoon.index12306.framework.starter.cache.DistributedCache;
@@ -23,10 +25,14 @@ import org.skyemoon.index12306.framework.starter.convention.exception.ServiceExc
 import org.skyemoon.index12306.framework.starter.designpattern.chain.AbstractChainContext;
 import org.skyemoon.index12306.frameworks.starter.user.core.UserInfoDTO;
 import org.skyemoon.index12306.frameworks.starter.user.toolkit.JWTUtil;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static org.skyemoon.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
+import static org.skyemoon.index12306.biz.userservice.toolkit.UserReuseUtil.hashShardingIdx;
 
 @Service
 @Slf4j
@@ -98,5 +104,25 @@ public class UserLoginServiceImpl implements UserLoginService {
         if (StrUtil.isNotBlank(accessToken)) {
             distributedCache.delete(accessToken);
         }
+    }
+
+    @Override
+    public Boolean hasUsername(String username) {
+        boolean hasUsername = userRegisterCachePenetrationBloomFilter.contains(username);
+        if (hasUsername) {
+            StringRedisTemplate instance = (StringRedisTemplate) distributedCache.getInstance();
+            return instance.opsForSet().isMember(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+        }
+        return true;
+    }
+
+    @Override
+    public UserRegisterRespDTO register(UserRegisterReqDTO requestParam) {
+        return null;
+    }
+
+    @Override
+    public void deletion(UserDeletionReqDTO requestParam) {
+
     }
 }
