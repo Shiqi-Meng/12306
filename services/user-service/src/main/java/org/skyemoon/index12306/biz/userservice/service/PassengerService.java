@@ -1,5 +1,6 @@
 package org.skyemoon.index12306.biz.userservice.service;
 
+import org.skyemoon.index12306.biz.userservice.dto.req.PassengerRemoveReqDTO;
 import org.skyemoon.index12306.biz.userservice.dto.req.PassengerReqDTO;
 import org.skyemoon.index12306.biz.userservice.dto.resp.PassengerActualRespDTO;
 import org.skyemoon.index12306.biz.userservice.dto.resp.PassengerRespDTO;
@@ -31,4 +32,18 @@ public interface PassengerService {
      * @param requestParam 乘车人信息
      */
     void savePassenger(PassengerReqDTO requestParam);
+
+    /**
+     * 修改乘车人
+     *
+     * @param requestParam 乘车人信息
+     */
+    void updatePassenger(PassengerRespDTO requestParam);
+
+    /**
+     * 删除乘车人
+     *
+     * @param requestParam 乘车人信息
+     */
+    void removePassenger(PassengerRemoveReqDTO requestParam);
 }
