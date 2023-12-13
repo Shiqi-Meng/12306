@@ -1,9 +1,10 @@
 package org.skyemoon.index12306.biz.userservice.common.enums;
 
 import lombok.AllArgsConstructor;
+import org.skyemoon.index12306.framework.starter.convention.errorcode.IErrorCode;
 
 @AllArgsConstructor
-public enum UserRegisterErrorCodeEnum implements IErrorCode{
+public enum UserRegisterErrorCodeEnum implements IErrorCode {
 
     USER_REGISTER_FAIL("A006000", "用户注册失败"),
 

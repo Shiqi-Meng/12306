@@ -91,7 +91,7 @@ public class PassengerServiceImpl implements PassengerService {
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
-//        delUserPassengerCache(username);
+        delUserPassengerCache(username);
     }
 
     @Override
