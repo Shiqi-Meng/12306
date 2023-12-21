@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 import org.skyemoon.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 座位实体
+ * 车站实体
  */
+
 @Data
-@TableName("t_seat")
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@TableName("t_station")
 public class StationDO extends BaseDO {
 
     /**
@@ -23,42 +21,27 @@ public class StationDO extends BaseDO {
     private Long id;
 
     /**
-     * 列车id
+     * 车站编码
      */
-    private Long trainId;
+    private String code;
 
     /**
-     * 车厢号
+     * 车站名称
      */
-    private String carriageNumber;
+    private String name;
 
     /**
-     * 座位号
+     * 拼音
      */
-    private String seatNumber;
+    private String spell;
 
     /**
-     * 座位类型
+     * 地区编号
      */
-    private Integer seatType;
+    private String region;
 
     /**
-     * 起始站
+     * 地区名称
      */
-    private String startStation;
-
-    /**
-     * 终点站
-     */
-    private String endStation;
-
-    /**
-     * 座位状态
-     */
-    private Integer seatStatus;
-
-    /**
-     * 车票价格
-     */
-    private Integer price;
+    private String regionName;
 }
