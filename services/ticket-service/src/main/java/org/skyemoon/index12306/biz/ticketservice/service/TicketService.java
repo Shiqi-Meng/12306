@@ -17,4 +17,13 @@ public interface TicketService extends IService<TicketDO> {
      * @return 查询车票返回结果
      */
     TicketPageQueryRespDTO pageListTicketQueryV1(TicketPageQueryReqDTO requestParam);
+
+    /**
+     * 根据条件分页查询车票 高性能版本
+     *
+     * @param requestParam 分页查询车票请求参数
+     * @return 查询车票返回结果
+     */
+    TicketPageQueryRespDTO pageListTicketQueryV2(TicketPageQueryReqDTO requestParam);
+
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.skyemoon.index12306.biz.ticketservice.common.enums.VehicleTypeEnum;
 import org.skyemoon.index12306.biz.ticketservice.dao.entity.*;
 import org.skyemoon.index12306.biz.ticketservice.dao.mapper.*;
 import org.skyemoon.index12306.biz.ticketservice.dto.domain.SeatClassDTO;
@@ -25,7 +26,9 @@ import org.skyemoon.index12306.biz.ticketservice.toolkit.TimeStringComparator;
 import org.skyemoon.index12306.framework.starter.bases.ApplicationContextHolder;
 import org.skyemoon.index12306.framework.starter.cache.DistributedCache;
 import org.skyemoon.index12306.framework.starter.cache.toolkit.CacheUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +59,12 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final SeatMarginCacheLoader seatMarginCacheLoader;
 
     private TicketService ticketService;
+
+    @Value("${ticket.availability.cache-update.type}")
+    private String ticketAvailabilityCacheUpdateType;
+
+    @Value("${framework.cache.redis.prefix:}")
+    private String cacheRedisPrefix;
 
     @Override
     public TicketPageQueryRespDTO pageListTicketQueryV1(TicketPageQueryReqDTO requestParam) {
@@ -184,6 +193,69 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
                         });
                 seatClassList.add(new SeatClassDTO(item.getSeatType(), quantity, new BigDecimal(item.getPrice()).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP), false));
             });
+            each.setSeatClassList(seatClassList);
+        }
+        return TicketPageQueryRespDTO.builder()
+                .trainList(seatResults)
+                .departureStationList(buildDepartureStationList(seatResults))
+                .arrivalStationList(buildArrivalStationList(seatResults))
+                .trainBrandList(buildTrainBrandList(seatResults))
+                .seatClassTypeList(buildSeatClassList(seatResults))
+                .build();
+    }
+
+    @Override
+    public TicketPageQueryRespDTO pageListTicketQueryV2(TicketPageQueryReqDTO requestParam) {
+        // TODO 责任链模式验证
+        StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) distributedCache.getInstance();
+        List<Object> stationDetails = stringRedisTemplate.opsForHash()
+                .multiGet(REGION_TRAIN_STATION_MAPPING, Lists.newArrayList(requestParam.getFromStation(), requestParam.getToStation()));
+        String buildRegionTrainStationHashKey = String.format(REGION_TRAIN_STATION, stationDetails.get(0), stationDetails.get(1));
+        Map<Object, Object> regionTrainStationAllMap = stringRedisTemplate.opsForHash().entries(buildRegionTrainStationHashKey);
+        List<TicketListDTO> seatResults = regionTrainStationAllMap.values().stream()
+                .map(each -> JSON.parseObject(each.toString(), TicketListDTO.class))
+                .sorted(new TimeStringComparator())
+                .toList();
+        List<String> trainStationPriceKeys = seatResults.stream()
+                .map(each -> String.format(cacheRedisPrefix + TRAIN_STATION_PRICE, each.getTrainId(), each.getDeparture(), each.getArrival()))
+                .toList();
+        List<Object> trainStationPriceObjs = stringRedisTemplate.executePipelined((RedisCallback<String>) connection -> {
+            trainStationPriceKeys.forEach(each -> connection.stringCommands().get(each.getBytes()));
+            return null;
+        });
+        List<TrainStationPriceDO> trainStationPriceDOList = new ArrayList<>();
+        List<String> trainStationRemainingKeyList = new ArrayList<>();
+        for (Object each : trainStationPriceObjs) {
+            List<TrainStationPriceDO> trainStationPriceList = JSON.parseArray(each.toString(), TrainStationPriceDO.class);
+            trainStationPriceDOList.addAll(trainStationPriceList);
+            for (TrainStationPriceDO item : trainStationPriceList) {
+                String trainStationRemainingKey = cacheRedisPrefix + TRAIN_STATION_REMAINING_TICKET + StrUtil.join("_", item.getTrainId(), item.getDeparture(), item.getArrival());
+                trainStationRemainingKeyList.add(trainStationRemainingKey);
+            }
+        }
+        List<Object> TrainStationRemainingObjs = stringRedisTemplate.executePipelined((RedisCallback<String>) connection -> {
+            for (int i = 0; i < trainStationRemainingKeyList.size(); i++) {
+                connection.hashCommands().hGet(trainStationRemainingKeyList.get(i).getBytes(), trainStationPriceDOList.get(i).getSeatType().toString().getBytes());
+            }
+            return null;
+        });
+        for (TicketListDTO each : seatResults) {
+            List<Integer> seatTypesByCode = VehicleTypeEnum.findSeatTypesByCode(each.getTrainType());
+            ArrayList<Object> remainingTicket = new ArrayList<>(TrainStationRemainingObjs.subList(0, seatTypesByCode.size()));
+            List<TrainStationPriceDO> trainStationPriceDOSub = new ArrayList<>(trainStationPriceDOList.subList(0, seatTypesByCode.size()));
+            TrainStationRemainingObjs.subList(0, seatTypesByCode.size()).clear();
+            trainStationPriceDOList.subList(0, seatTypesByCode.size()).clear();
+            List<SeatClassDTO> seatClassList = new ArrayList<>();
+            for (int i = 0; i < trainStationPriceDOSub.size(); i++) {
+                TrainStationPriceDO trainStationPriceDO = trainStationPriceDOSub.get(i);
+                SeatClassDTO seatClassDTO = SeatClassDTO.builder()
+                        .type(trainStationPriceDO.getSeatType())
+                        .quantity(Integer.parseInt(remainingTicket.get(i).toString()))
+                        .price(new BigDecimal(trainStationPriceDO.getPrice()).divide(new BigDecimal("100"), 1, RoundingMode.HALF_UP))
+                        .candidate(false)
+                        .build();
+                seatClassList.add(seatClassDTO);
+            }
             each.setSeatClassList(seatClassList);
         }
         return TicketPageQueryRespDTO.builder()
