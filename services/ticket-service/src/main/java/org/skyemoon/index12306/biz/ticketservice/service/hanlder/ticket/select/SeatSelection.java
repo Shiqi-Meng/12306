@@ -37,7 +37,7 @@ public class SeatSelection {
             if (!selectedSeats.isEmpty()) break;
         }
         if (CollUtil.isEmpty(selectedSeats)) return null;
-        
+
         int[][] actualSeat = new int[numSeats][2];
         int i = 0;
         for (int[] seat : selectedSeats) {
