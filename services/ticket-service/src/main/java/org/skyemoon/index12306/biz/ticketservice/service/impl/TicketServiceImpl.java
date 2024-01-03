@@ -20,6 +20,7 @@ import org.skyemoon.index12306.biz.ticketservice.common.enums.TicketStatusEnum;
 import org.skyemoon.index12306.biz.ticketservice.common.enums.VehicleTypeEnum;
 import org.skyemoon.index12306.biz.ticketservice.dao.entity.*;
 import org.skyemoon.index12306.biz.ticketservice.dao.mapper.*;
+import org.skyemoon.index12306.biz.ticketservice.dto.domain.PurchaseTicketPassengerDetailDTO;
 import org.skyemoon.index12306.biz.ticketservice.dto.domain.SeatClassDTO;
 import org.skyemoon.index12306.biz.ticketservice.dto.domain.TicketListDTO;
 import org.skyemoon.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
@@ -34,6 +35,7 @@ import org.skyemoon.index12306.biz.ticketservice.remote.dto.TicketOrderRemoteSer
 import org.skyemoon.index12306.biz.ticketservice.service.TicketService;
 import org.skyemoon.index12306.biz.ticketservice.service.cache.SeatMarginCacheLoader;
 import org.skyemoon.index12306.biz.ticketservice.service.hanlder.ticket.select.TrainSeatTypeSelector;
+import org.skyemoon.index12306.biz.ticketservice.service.hanlder.ticket.tokenbucket.TicketAvailabilityTokenBucket;
 import org.skyemoon.index12306.biz.ticketservice.toolkit.DateUtil;
 import org.skyemoon.index12306.biz.ticketservice.toolkit.TimeStringComparator;
 import org.skyemoon.index12306.framework.starter.bases.ApplicationContextHolder;
@@ -81,6 +83,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final ConfigurableEnvironment environment;
     private final TrainSeatTypeSelector trainSeatTypeSelector;
     private final TicketOrderRemoteService ticketOrderRemoteService;
+    private final TicketAvailabilityTokenBucket ticketAvailabilityTokenBucket;
 
     private TicketService ticketService;
 
@@ -309,6 +312,56 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     }
 
     @Override
+    public TicketPurchaseRespDTO purchaseTicketsV2(PurchaseTicketReqDTO requestParam) {
+        // 责任链模式
+        purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), requestParam);
+        // TODO 令牌限流限制获取分布式锁 TicketAvailabilityTokenBucket
+        boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(requestParam);
+        if (!tokenResult) {
+            throw new ServiceException("列车站点已无余票");
+        }
+        // 本地锁+分布式锁
+        // TODO 加锁粒度问题
+        List<ReentrantLock> localLockList = new ArrayList<>();
+        List<RLock> distributedLockList = new ArrayList<>();
+        Map<Integer, List<PurchaseTicketPassengerDetailDTO>> seatTypeMap = requestParam.getPassengers().stream()
+                .collect(Collectors.groupingBy(PurchaseTicketPassengerDetailDTO::getSeatType));
+        seatTypeMap.forEach((seatType, count) -> {
+            String lockKey = environment.resolvePlaceholders(String.format(LOCK_PURCHASE_TICKETS_V2, requestParam.getTrainId(), seatType));
+            ReentrantLock localLock = localLockMap.getIfPresent(lockKey);
+            if (localLock == null) {
+                synchronized (TicketService.class) {
+                    if ((localLock = localLockMap.getIfPresent(lockKey)) == null) {
+                        localLock = new ReentrantLock(true);
+                        localLockMap.put(lockKey, localLock);
+                    }
+                }
+            }
+            localLockList.add(localLock);
+            RLock distributedLock = redissonClient.getFairLock(lockKey);
+            distributedLockList.add(distributedLock);
+        });
+        try {
+            localLockList.forEach(ReentrantLock::lock);
+            distributedLockList.forEach(RLock::lock);
+            return ticketService.executePurchaseTickets(requestParam);
+        } finally {
+            localLockList.forEach(localLock -> {
+                try {
+                    localLock.unlock();
+                } catch (Throwable ignored){
+                }
+            });
+            distributedLockList.forEach(distributedLock -> {
+                try {
+                    distributedLock.unlock();
+                } catch (Throwable ignored) {
+                }
+            });
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = Throwable.class)
     public TicketPurchaseRespDTO executePurchaseTickets(PurchaseTicketReqDTO requestParam) {
         List<TicketOrderDetailRespDTO> ticketOrderDetailResults = new ArrayList<>();
@@ -390,7 +443,6 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
         }
         return new TicketPurchaseRespDTO(ticketOrderResult.getData(), ticketOrderDetailResults);
     }
-
 
     private List<String> buildDepartureStationList(List<TicketListDTO> seatResults) {
         return seatResults.stream().map(TicketListDTO::getDeparture).distinct().collect(Collectors.toList());
