@@ -31,7 +31,7 @@ import org.skyemoon.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
 import org.skyemoon.index12306.biz.ticketservice.dto.resp.TrainPurchaseTicketRespDTO;
 import org.skyemoon.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
 import org.skyemoon.index12306.biz.ticketservice.remote.dto.TicketOrderItemCreateRemoteReqDTO;
-import org.skyemoon.index12306.biz.ticketservice.remote.dto.TicketOrderRemoteService;
+import org.skyemoon.index12306.biz.ticketservice.remote.TicketOrderRemoteService;
 import org.skyemoon.index12306.biz.ticketservice.service.TicketService;
 import org.skyemoon.index12306.biz.ticketservice.service.cache.SeatMarginCacheLoader;
 import org.skyemoon.index12306.biz.ticketservice.service.hanlder.ticket.select.TrainSeatTypeSelector;
