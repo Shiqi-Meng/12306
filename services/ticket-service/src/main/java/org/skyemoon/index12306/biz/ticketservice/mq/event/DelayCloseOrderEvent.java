@@ -1,9 +1,17 @@
 package org.skyemoon.index12306.biz.ticketservice.mq.event;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.skyemoon.index12306.biz.ticketservice.dto.resp.TrainPurchaseTicketRespDTO;
 
 import java.util.List;
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DelayCloseOrderEvent {
 
     /**
@@ -29,5 +37,5 @@ public class DelayCloseOrderEvent {
     /**
      * 乘车人购票信息
      */
-    private List<TrainPurchaseTicketRespDTO> trainPurchaseTicketResult;
+    private List<TrainPurchaseTicketRespDTO> trainPurchaseTicketResults;
 }
