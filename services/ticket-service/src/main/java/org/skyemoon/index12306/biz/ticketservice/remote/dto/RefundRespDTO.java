@@ -1,2 +1,7 @@
-package org.skyemoon.index12306.biz.ticketservice.remote.dto;public class RefundRespDTO {
+package org.skyemoon.index12306.biz.ticketservice.remote.dto;
+
+import lombok.Data;
+
+@Data
+public class RefundRespDTO {
 }

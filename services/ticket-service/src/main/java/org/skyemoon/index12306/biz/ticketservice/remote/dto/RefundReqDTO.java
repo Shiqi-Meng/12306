@@ -1,2 +1,30 @@
-package org.skyemoon.index12306.biz.ticketservice.remote.dto;public class RefundReqDTO {
+package org.skyemoon.index12306.biz.ticketservice.remote.dto;
+
+import lombok.Data;
+import org.skyemoon.index12306.biz.ticketservice.common.enums.RefundTypeEnum;
+
+import java.util.List;
+
+@Data
+public class RefundReqDTO {
+
+    /**
+     * 订单号
+     */
+    private String orderSn;
+
+    /**
+     * 退款类型枚举
+     */
+    private RefundTypeEnum refundTypeEnum;
+
+    /**
+     * 退款金额
+     */
+    private Integer refundAmount;
+
+    /**
+     * 部分退款车票详情集合
+     */
+    private List<TicketOrderPassengerDetailRespDTO> refundDetailReqDTOList;
 }
