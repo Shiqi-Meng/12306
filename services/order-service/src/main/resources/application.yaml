@@ -1,0 +1,24 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: index12306-order${unique-name:}-service
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      password: nacos
+      username: nacos
+    sentinel:
+      transport:
+        dashboard: localhost:8686
+        port: 8719
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
